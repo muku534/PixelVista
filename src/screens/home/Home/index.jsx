@@ -1,5 +1,5 @@
 import { FlatList, Image, SafeAreaView, ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
 import { COLORS } from '../../../../constants'
@@ -48,18 +48,49 @@ const DATA = [
     },
 ];
 
-const groupData = (data, itemsPerGroup) => {
-    const groupedData = [];
-    for (let i = 0; i < data.length; i += itemsPerGroup) {
-        groupedData.push(data.slice(i, i + itemsPerGroup));
-    }
-    return groupedData;
-};
-
-const groupedData = groupData(DATA, 3);
-
 
 const Home = () => {
+
+    const [wallpapers, setWallpapers] = useState([]);
+    const [page, setPage] = useState(1);
+    const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+        PexelWallpapers()
+    }, [])
+
+    const PexelWallpapers = async () => {
+        try {
+            setLoading(true);
+            const response = await fetch(`https://api.pexels.com/v1/curated?per_page=80&page=${page}`, {
+                headers: {
+                    Authorization: 'QXMTh7DwFambKiqqnhj2PkyROns0cCWkXruMC5Diw95DsmdSBCDlqjEB',
+                },
+            });
+            const data = await response.json();
+            setWallpapers(prevWallpapers => [...prevWallpapers, ...data.photos]);
+            setPage(prevPage => prevPage + 1);
+            setLoading(false);
+        } catch (error) {
+            console.error('Error fetching wallpapers:', error);
+            setLoading(false);
+        }
+    };
+
+    const handleEndReached = () => {
+        if (!loading) {
+            PexelWallpapers();
+        }
+    };
+
+    const MemoizedImageItem = React.memo(({ item }) => (
+        <TouchableOpacity activeOpacity={0.7}>
+            <Image
+                source={{ uri: item.src.original }}
+                style={{ width: wp(31), height: hp(22), borderRadius: wp(2) }}
+            />
+        </TouchableOpacity>
+    ));
 
     return (
         <SafeAreaView style={{ flex: 1 }}>
@@ -75,7 +106,8 @@ const Home = () => {
                     </TouchableOpacity>
                 </View>
             </View>
-            <ScrollView >
+
+            {/** 
                 <View style={{ marginVertical: hp(1) }}>
                     <Text style={{ padding: wp(2), fontSize: hp(2.7), color: COLORS.secondaryBlack, fontWeight: '700' }}>Popular Collections</Text>
                     <FlatList
@@ -92,33 +124,34 @@ const Home = () => {
                         showsHorizontalScrollIndicator={false}
                     />
                 </View>
+             */}
 
-                <View style={{ marginVertical: hp(1), marginBottom: hp(7) }}>
-                    <Text style={{ padding: wp(2), fontSize: hp(2.7), color: COLORS.secondaryBlack, fontWeight: '700' }}>Popular </Text>
-                    <FlatList
-                        data={groupedData}
-                        keyExtractor={(item, index) => index.toString()}
-                        renderItem={({ item }) => (
-                            <View style={{
-                                flexDirection: 'row',
-                                justifyContent: 'space-between',
-                                marginHorizontal: wp(2),
-                                marginBottom: hp(1),
-                            }}>
-                                {item.map((imageItem) => (
-                                    <Image
-                                        key={imageItem.id}
-                                        source={{ uri: imageItem.image }}
-                                        style={{ width: wp(31), height: hp(22), borderRadius: wp(2), }}
-                                    />
-                                ))}
-                            </View>
-                        )}
-                        showsVerticalScrollIndicator={false}
-                    />
-                </View>
+            <View style={{ marginVertical: hp(1), marginBottom: hp(7) }}>
+                {/**    <Text style={{ padding: wp(2), fontSize: hp(2.7), color: COLORS.secondaryBlack, fontWeight: '700' }}>Popular </Text> */}
+                <FlatList
+                    data={wallpapers}
+                    numColumns={3}
+                    keyExtractor={(item) => item.id.toString()}
+                    renderItem={({ item }) => (
+                        <View style={{
+                            flexDirection: 'row',
+                            justifyContent: 'space-between',
+                            marginHorizontal: wp(1),
+                            marginBottom: hp(1),
+                        }}>
+                            <MemoizedImageItem item={item} />
+                        </View>
+                    )}
+                    initialNumToRender={15}
+                    maxToRenderPerBatch={5}
+                    windowSize={10}
+                    onEndReached={handleEndReached}
+                    onEndReachedThreshold={0.1} // Call handleEndReached when 10% of the remaining items are visible
+                    showsVerticalScrollIndicator={false}
+                />
+            </View>
 
-            </ScrollView>
+
 
         </SafeAreaView>
     )

@@ -6,7 +6,7 @@ import {
 } from '../../../Components/Pixel/Index'
 import { COLORS } from '../../../../constants'
 import { SigninWithGoogle } from '../../../config/firebase/GoogleSignin'
-
+import Toast from 'react-native-toast-message'
 
 const Login = ({ navigation }) => {
 
@@ -14,9 +14,17 @@ const Login = ({ navigation }) => {
         const userInfo = await SigninWithGoogle();
         if (userInfo) {
             // Handle successful login, e.g., navigate to another screen
+            Toast.show({
+                type: 'success',
+                Text1: `Welcome Back ${userInfo.displayname}`
+            })
             navigation.navigate('TabStack');
         } else {
             // Handle sign-in failure, e.g., show an error message
+            Toast.show({
+                type: 'error',
+                Text1: `Somthing went wrong please try again`
+            })
             console.log("Google Sign-In failed.");
         }
     };

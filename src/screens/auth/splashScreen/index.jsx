@@ -5,9 +5,9 @@ import LottieView from 'lottie-react-native';
 const SplashScreen = ({ navigation }) => {
 
     // Uncomment this line to navigate to "Login" screen after 1000ms
-    // setTimeout(() => {
-    //     navigation.navigate("Login")
-    // }, 1000);
+    setTimeout(() => {
+        navigation.navigate("Login")
+    }, 1000);
 
     return (
         <View style={styles.container}>
