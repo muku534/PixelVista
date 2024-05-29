@@ -1,5 +1,5 @@
-import { FlatList, Image, SafeAreaView, ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
-import React, { useEffect, useState } from 'react'
+import { FlatList, Image, SafeAreaView, ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, View, Animated, Easing, ActivityIndicator } from 'react-native'
+import React, { useEffect, useState, useRef, useMemo } from 'react'
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
 import { COLORS } from '../../../../constants'
@@ -7,90 +7,45 @@ import {
     heightPercentageToDP as hp,
     widthPercentageToDP as wp,
 } from '../../../Components/Pixel/Index'
+import FastImage from 'react-native-fast-image';
+import { fetchWallpapers } from '../../../redux/actions/wallpapersActions'
+import { useDispatch, useSelector } from 'react-redux'
+import { addRecentActivity } from '../../../redux/actions/recentActivityAction'
 
+const Home = ({ navigation }) => {
 
-const DATA = [
-    {
-        id: '1',
-        image: 'https://images.pexels.com/photos/1173777/pexels-photo-1173777.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2'
-    },
-    {
-        id: '2',
-        image: 'https://images.pexels.com/photos/3225517/pexels-photo-3225517.jpeg?auto=compress&cs=tinysrgb&w=600'
-    },
-    {
-        id: '3',
-        image: 'https://images.pexels.com/photos/707344/pexels-photo-707344.jpeg?auto=compress&cs=tinysrgb&w=600'
-    },
-    {
-        id: '4',
-        image: 'https://images.pexels.com/photos/1624504/pexels-photo-1624504.jpeg?auto=compress&cs=tinysrgb&w=600'
-    },
-    {
-        id: '5',
-        image: 'https://images.pexels.com/photos/234272/pexels-photo-234272.jpeg?auto=compress&cs=tinysrgb&w=600'
-    },
-    {
-        id: '6',
-        image: 'https://images.pexels.com/photos/1770809/pexels-photo-1770809.jpeg?auto=compress&cs=tinysrgb&w=600'
-    },
-    {
-        id: '7',
-        image: 'https://images.pexels.com/photos/822528/pexels-photo-822528.jpeg?auto=compress&cs=tinysrgb&w=600'
-    },
-    {
-        id: '8',
-        image: 'https://images.pexels.com/photos/1761279/pexels-photo-1761279.jpeg?auto=compress&cs=tinysrgb&w=600'
-    },
-    {
-        id: '9',
-        image: 'https://images.pexels.com/photos/2223082/pexels-photo-2223082.jpeg?auto=compress&cs=tinysrgb&w=600'
-    },
-];
-
-
-const Home = () => {
-
-    const [wallpapers, setWallpapers] = useState([]);
-    const [page, setPage] = useState(1);
-    const [loading, setLoading] = useState(false);
-
-    useEffect(() => {
-        PexelWallpapers()
-    }, [])
-
-    const PexelWallpapers = async () => {
-        try {
-            setLoading(true);
-            const response = await fetch(`https://api.pexels.com/v1/curated?per_page=80&page=${page}`, {
-                headers: {
-                    Authorization: 'QXMTh7DwFambKiqqnhj2PkyROns0cCWkXruMC5Diw95DsmdSBCDlqjEB',
-                },
-            });
-            const data = await response.json();
-            setWallpapers(prevWallpapers => [...prevWallpapers, ...data.photos]);
-            setPage(prevPage => prevPage + 1);
-            setLoading(false);
-        } catch (error) {
-            console.error('Error fetching wallpapers:', error);
-            setLoading(false);
-        }
-    };
+    const dispatch = useDispatch();
+    const { wallpapers, loading } = useSelector((state) => state.wallpapers);
 
     const handleEndReached = () => {
         if (!loading) {
-            PexelWallpapers();
+            const nextPage = Math.ceil(wallpapers.length / 80) + 1;
+            dispatch(fetchWallpapers(nextPage));
         }
     };
 
-    const MemoizedImageItem = React.memo(({ item }) => (
-        <TouchableOpacity activeOpacity={0.7}>
-            <Image
-                source={{ uri: item.src.original }}
-                style={{ width: wp(31), height: hp(22), borderRadius: wp(2) }}
-            />
-        </TouchableOpacity>
-    ));
+    const handleImagePress = (item) => {
+        dispatch(addRecentActivity(item));
+        navigation.navigate('ImageScreen', { imageUrl: item.src.original });
+    };
+
+    const MemoizedImageItem = useMemo(() => {
+        return ({ item }) => (
+            <TouchableOpacity activeOpacity={0.7} onPress={() => handleImagePress(item)}>
+
+                <FastImage
+                    source={{ uri: item.src.tiny, priority: FastImage.priority.high }}
+                    style={{ width: wp(31), height: hp(22), borderRadius: wp(2) }}
+                    resizeMode={FastImage.resizeMode.cover}
+                    fallback
+                    // placeholders={generatePlaceholderGrid(4, 3)}
+                    placeholderStyle={{ width: wp(31), height: hp(22), borderRadius: wp(2), backgroundColor: COLORS.gray }}
+                    cacheControl={FastImage.cacheControl.immutable} // Ensures images are cached
+                />
+            </TouchableOpacity>
+        );
+    }, []);
+
 
     return (
         <SafeAreaView style={{ flex: 1 }}>
@@ -107,24 +62,6 @@ const Home = () => {
                 </View>
             </View>
 
-            {/** 
-                <View style={{ marginVertical: hp(1) }}>
-                    <Text style={{ padding: wp(2), fontSize: hp(2.7), color: COLORS.secondaryBlack, fontWeight: '700' }}>Popular Collections</Text>
-                    <FlatList
-                        data={DATA.slice(0, 5)}
-                        horizontal
-                        keyExtractor={item => item.id}
-                        renderItem={({ item }) => (
-                            <TouchableOpacity activeOpacity={0.7}>
-                                <View style={{ justifyContent: 'space-between', alignItems: 'center', marginHorizontal: wp(1), }}>
-                                    <Image source={{ uri: item.image }} style={{ width: wp(25), height: hp(18), borderRadius: wp(2), }} />
-                                </View>
-                            </TouchableOpacity>
-                        )}
-                        showsHorizontalScrollIndicator={false}
-                    />
-                </View>
-             */}
 
             <View style={{ marginVertical: hp(1), marginBottom: hp(7) }}>
                 {/**    <Text style={{ padding: wp(2), fontSize: hp(2.7), color: COLORS.secondaryBlack, fontWeight: '700' }}>Popular </Text> */}
@@ -133,21 +70,25 @@ const Home = () => {
                     numColumns={3}
                     keyExtractor={(item) => item.id.toString()}
                     renderItem={({ item }) => (
-                        <View style={{
-                            flexDirection: 'row',
-                            justifyContent: 'space-between',
-                            marginHorizontal: wp(1),
-                            marginBottom: hp(1),
-                        }}>
+                        <View style={{ marginHorizontal: wp(1.1), marginBottom: hp(1) }}>
                             <MemoizedImageItem item={item} />
                         </View>
                     )}
                     initialNumToRender={15}
                     maxToRenderPerBatch={5}
-                    windowSize={10}
+                    windowSize={100} // Increase this value to keep more items in memory
                     onEndReached={handleEndReached}
-                    onEndReachedThreshold={0.1} // Call handleEndReached when 10% of the remaining items are visible
+                    onEndReachedThreshold={0.5} // Call handleEndReached when 50% of the remaining items are visible
                     showsVerticalScrollIndicator={false}
+                    removeClippedSubviews={false} // Disabling this will prevent items from being removed from memory
+                    getItemLayout={(data, index) => (
+                        { length: hp(22), offset: hp(22) * index, index }
+                    )}
+                    ListFooterComponent={loading ? (
+                        <View style={{ marginBottom: hp(12) }}>
+                            <ActivityIndicator size="large" color={COLORS.primary} />
+                        </View>
+                    ) : null}
                 />
             </View>
 

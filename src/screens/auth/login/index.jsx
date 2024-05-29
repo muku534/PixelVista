@@ -1,5 +1,5 @@
 import { Button, Image, KeyboardAvoidingView, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
-import React from 'react'
+import React, { useEffect } from 'react'
 import {
     heightPercentageToDP as hp,
     widthPercentageToDP as wp,
@@ -7,27 +7,32 @@ import {
 import { COLORS } from '../../../../constants'
 import { SigninWithGoogle } from '../../../config/firebase/GoogleSignin'
 import Toast from 'react-native-toast-message'
+import { useDispatch, useSelector } from 'react-redux'
+import { loginWithGoogle } from '../../../redux/actions/loginAction'
+import { fetchWallpapers } from '../../../redux/actions/wallpapersActions'
 
 const Login = ({ navigation }) => {
 
+    const dispatch = useDispatch();
+    const user = useSelector(state => state.user.userInfo);
+    const loading = useSelector(state => state.user.loading);
+
     const handleGoogleSignIn = async () => {
-        const userInfo = await SigninWithGoogle();
-        if (userInfo) {
-            // Handle successful login, e.g., navigate to another screen
+        dispatch(loginWithGoogle());
+    };
+
+    useEffect(() => {
+        if (user) {
+            dispatch(fetchWallpapers(1));
             Toast.show({
                 type: 'success',
-                Text1: `Welcome Back ${userInfo.displayname}`
-            })
+                text1: `Welcome Back ${user.displayName}`,
+            });
+            console.log(user.photoURL, user.displayName); // Corrected properties
             navigation.navigate('TabStack');
-        } else {
-            // Handle sign-in failure, e.g., show an error message
-            Toast.show({
-                type: 'error',
-                Text1: `Somthing went wrong please try again`
-            })
-            console.log("Google Sign-In failed.");
         }
-    };
+    }, [user, dispatch, navigation]);
+
 
     return (
         <KeyboardAvoidingView style={{ flex: 1 }} behavior='padding'>

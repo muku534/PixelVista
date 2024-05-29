@@ -8,7 +8,8 @@ import { COLORS } from '../../../../constants'
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
 import fontFamily from '../../../../constants/fontFamily'
-
+import { firebase } from '@react-native-firebase/firestore';
+import { useSelector } from 'react-redux'
 
 const DATA = [
     {
@@ -34,7 +35,28 @@ const DATA = [
 
 ];
 
-const Profile = () => {
+
+const Profile = ({ navigation }) => {
+    const userInfo = useSelector(state => state.user.userInfo);
+    const recentActivities = useSelector(state => state.recent.recentActivities)
+
+    console.log('UserInfo in Profile:', userInfo); // Debug log
+    console.log('UserInfo in Profile:', recentActivities); // Debug log
+
+    const handleLogout = async () => {
+        try {
+            await firebase.auth().signOut();
+            // Clear user data from AsyncStorage
+            // await AsyncStorage.removeItem('userData');
+            // await AsyncStorage.removeItem('randomNumber');
+            // Navigate to login screen or any other screen
+            navigation.navigate('Login');
+        } catch (error) {
+            console.error('Error signing out:', error);
+        }
+    };
+
+
     return (
         <SafeAreaView style={{ flex: 1 }}>
             <View style={{ margin: hp(2), marginTop: hp(2), }}>
@@ -46,27 +68,27 @@ const Profile = () => {
                 </View>
 
                 <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: hp(3) }}>
-                    <Image source={{ uri: 'https://images.pexels.com/photos/1173777/pexels-photo-1173777.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2' }} style={{ width: wp(17), height: wp(17), borderRadius: wp(17) }} />
+                    <Image source={{ uri: userInfo?.user.photo }} style={{ width: wp(17), height: wp(17), borderRadius: wp(17) }} />
                     <View>
                         <Text style={{
                             fontFamily: fontFamily.FONTS.Medium,
                             fontSize: hp(2.5),
                             color: COLORS.black,
                             marginHorizontal: wp(22),
-                        }}>Mr.Mukesh</Text>
+                        }}>{userInfo?.user?.name}</Text>
                     </View>
                 </View>
             </View>
             <View>
                 <Text style={{ padding: wp(2), fontSize: hp(2.9), color: COLORS.secondaryBlack, fontWeight: '800' }}>Recent Activity</Text>
                 <FlatList
-                    data={DATA}
+                    data={recentActivities}
                     horizontal
                     keyExtractor={item => item.id}
                     renderItem={({ item }) => (
                         <TouchableOpacity activeOpacity={0.7}>
                             <View style={{ justifyContent: 'space-between', alignItems: 'center', marginHorizontal: wp(1), }}>
-                                <Image source={{ uri: item.image }} style={{ width: wp(29), height: hp(22), borderRadius: wp(2), }} />
+                                <Image source={{ uri: item?.src?.original }} style={{ width: wp(29), height: hp(22), borderRadius: wp(2), }} />
                             </View>
                         </TouchableOpacity>
                     )}
@@ -101,7 +123,7 @@ const Profile = () => {
                 </View>
             </View>
 
-            <TouchableOpacity>
+            <TouchableOpacity onPress={handleLogout}>
                 <View style={{
                     flexDirection: 'row',
                     alignItems: 'center',

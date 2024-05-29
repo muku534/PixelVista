@@ -20,13 +20,15 @@ import {
 } from './src/Components/Pixel/Index';
 import Editor from './src/screens/home/editor';
 
-// import { Provider } from 'react-redux';
-// import store from './src/Redux/Store';
+import { Provider, useSelector } from 'react-redux';
+import store from './src/redux/store';
+import ImageScreen from './src/screens/home/Home/image';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
 
 const TabStack = () => {
+  // const userData = useSelector(state => state.user_data);
   return (
     <Tab.Navigator
       initialRouteName="HomeScreen"
@@ -92,17 +94,21 @@ function App() {
 
 
   return (
-    <SafeAreaProvider>
-      <NavigationContainer >
-        <Stack.Navigator initialRouteName={initialScreen}>
-          <Stack.Screen name="SplashScreen" component={SplashScreen} options={{ headerShown: false }} />
-          <Stack.Screen name="Login" component={Login} options={{ headerShown: false }} />
-          <Stack.Screen name="Signup" component={Signup} options={{ headerShown: false }} />
-          <Stack.Screen name="Home" component={Home} options={{ headerShown: false }} />
-          <Stack.Screen name="TabStack" component={TabStack} options={{ headerShown: false }} />
-        </Stack.Navigator>
-      </NavigationContainer>
-    </SafeAreaProvider>
+    <Provider store={store}>
+      <SafeAreaProvider>
+        <NavigationContainer>
+          <Stack.Navigator initialRouteName={initialScreen}>
+            <Stack.Screen name="SplashScreen" component={SplashScreen} options={{ headerShown: false }} />
+            <Stack.Screen name="Login" component={Login} options={{ headerShown: false }} />
+            <Stack.Screen name="Signup" component={Signup} options={{ headerShown: false }} />
+            <Stack.Screen name="Home" component={Home} options={{ headerShown: false }} />
+            <Stack.Screen name="TabStack" component={TabStack} options={{ headerShown: false }} />
+            <Stack.Screen name="ImageScreen" component={ImageScreen} options={{ headerShown: false, cardStyle: { backgroundColor: 'transparent' }, presentation: 'transparentModal' }}
+            />
+          </Stack.Navigator>
+        </NavigationContainer>
+      </SafeAreaProvider>
+    </Provider>
   );
 }
 

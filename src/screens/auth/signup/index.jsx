@@ -1,8 +1,41 @@
 import { Button, KeyboardAvoidingView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
 import React from 'react'
 import { ScrollView } from 'react-native-gesture-handler'
+import { SigninWithGoogle } from '../../../config/firebase/GoogleSignin'
+import Toast from 'react-native-toast-message'
 
 const Signup = ({ navigation }) => {
+
+    const handleGoogleSignIn = async () => {
+        try {
+            const userInfo = await SigninWithGoogle();
+            console.log("Google login", userInfo);
+            if (userInfo) {
+                // Handle successful login
+                Toast.show({
+                    type: 'success',
+                    text1: `Account Created successfully`,
+                });
+                console.log("Navigating to Login");
+                navigation.navigate('Login');
+            } else {
+                // Handle sign-in failure
+                Toast.show({
+                    type: 'error',
+                    text1: 'Something went wrong, please try again',
+                });
+                console.log("Google Sign-In failed.");
+            }
+        } catch (error) {
+            console.error("Error during Google sign-in:", error);
+            Toast.show({
+                type: 'error',
+                text1: 'Something went wrong, please try again',
+            });
+        }
+    };
+
+
     return (
         <KeyboardAvoidingView style={{ flex: 1 }} behavior='padding'>
             <ScrollView contentContainerStyle={{ flexGrow: 1 }} showsVerticalScrollIndicator={false}>
@@ -14,58 +47,6 @@ const Signup = ({ navigation }) => {
                         </View>
 
                         <View style={{ marginVertical: 10, }}>
-                            <View>
-                                <Text style={{
-                                    color: 'black',
-                                    fontSize: 16,
-                                    fontWeight: '400',
-                                    marginTop: 16,
-                                    marginBottom: 5,
-                                }}>First Name</Text>
-                                <View style={{
-                                    width: '100%',
-                                    height: 48,
-                                    borderColor: 'black',
-                                    borderWidth: 0.5,
-                                    borderRadius: 10,
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    paddingLeft: 10,
-                                }}>
-                                    <TextInput
-                                        placeholder='Enter your First name'
-                                        placeholderTextColor={'gray'}
-                                        keyboardType='default'
-                                        style={{ width: '100%', color: 'black' }}
-                                    />
-                                </View>
-                            </View>
-                            <View>
-                                <Text style={{
-                                    color: 'black',
-                                    fontSize: 16,
-                                    fontWeight: '400',
-                                    marginTop: 16,
-                                    marginBottom: 5,
-                                }}>Last Name</Text>
-                                <View style={{
-                                    width: '100%',
-                                    height: 48,
-                                    borderColor: 'black',
-                                    borderWidth: 0.5,
-                                    borderRadius: 10,
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    paddingLeft: 10,
-                                }}>
-                                    <TextInput
-                                        placeholder='Enter your last name'
-                                        placeholderTextColor={'gray'}
-                                        keyboardType='default'
-                                        style={{ width: '100%', color: 'black' }}
-                                    />
-                                </View>
-                            </View>
                             <View>
                                 <Text style={{
                                     color: 'black',
@@ -135,6 +116,19 @@ const Signup = ({ navigation }) => {
                             <Text style={styles.linkText}>If you alredy have an account? </Text>
                             <TouchableOpacity onPress={() => navigation.navigate('Login')} style={styles.linkbutton}>
                                 <Text style={styles.link}>Login</Text>
+                            </TouchableOpacity>
+                        </View>
+
+                        <View style={{ marginVertical: hp(3), justifyContent: 'center', flexDirection: 'row', alignItems: 'center' }}>
+
+                            <TouchableOpacity style={{ marginHorizontal: wp(3), paddingHorizontal: wp(4), flexDirection: 'row', borderRadius: wp(2), borderWidth: hp(0.2), borderColor: COLORS.gray, padding: hp(0.5), alignItems: 'center' }} onPress={() => handleGoogleSignIn()}>
+                                <Image source={require("../../../../assets/images/google.png")} style={{ height: hp(5), width: wp(10) }} />
+                                <Text style={{ fontSize: hp(2.2), paddingHorizontal: wp(2), color: COLORS.darkgray1 }}>Google</Text>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity style={{ marginHorizontal: wp(3), paddingHorizontal: wp(4), flexDirection: 'row', borderRadius: wp(2), borderWidth: hp(0.2), borderColor: COLORS.gray, padding: hp(0.5), alignItems: 'center' }}>
+                                <Image source={require("../../../../assets/images/facebook.png")} style={{ height: hp(5), width: wp(10) }} />
+                                <Text style={{ fontSize: hp(2.2), paddingHorizontal: wp(2), color: COLORS.darkgray1 }}>Facebook</Text>
                             </TouchableOpacity>
                         </View>
                     </View>

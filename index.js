@@ -9,12 +9,12 @@ import { initializeApp } from '@react-native-firebase/app'
 
 // Your Firebase config (from the Firebase console)
 const firebaseConfig = {
-    apiKey: 'AIzaSyAPKBcE11Vg-ilYzZKwKZ0hwgwdHmj42eA',
-    authDomain: 'pixelvista-ec9d7.firebaseapp.com',
-    projectId: 'pixelvista-ec9d7',
-    storageBucket: 'pixelvista-ec9d7.appspot.com',
-    messagingSenderId: '634709718614',
-    appId: '1:634709718614:android:52e2ab7710acb0e777adf7',
+    apiKey: process.env.API_KEY,
+    authDomain: process.env.AUTH_DOMAIN,
+    projectId: process.env.PROJECT_ID,
+    storageBucket: process.env.STORAGEBUCKET,
+    messagingSenderId: process.env.MESSAGING_SENDER_ID,
+    appId: process.env.APP_ID,
 };
 
 // Initialize Firebase
