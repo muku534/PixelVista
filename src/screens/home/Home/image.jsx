@@ -1,5 +1,5 @@
-import React, { useRef } from 'react';
-import { View, Image, StyleSheet, TouchableOpacity, Text, Share, PermissionsAndroid, Alert, Platform, ToastAndroid } from 'react-native';
+import React, { useRef, useState } from 'react';
+import { View, Image, StyleSheet, TouchableOpacity, Text, Share, PermissionsAndroid, Alert, Platform, ToastAndroid, ActivityIndicator } from 'react-native';
 import { BlurView } from '@react-native-community/blur';
 import { useNavigation } from '@react-navigation/native';
 import {
@@ -20,6 +20,7 @@ const ImageScreen = ({ route }) => {
     const { imageUrl } = route.params;
     const navigation = useNavigation();
     const rbSheetRef = useRef(null);
+    const [loading, setLoading] = useState(false);
 
     const handleShare = (imageUrl) => {
         Share.share({
@@ -80,14 +81,24 @@ const ImageScreen = ({ route }) => {
         }
     };
 
-    const setWallpaper = (type) => {
-        ManageWallpaper.setWallpaper(
-            {
-                uri: imageUrl,
-            },
-            (res) => Alert.alert('Success', `Wallpaper set successfully on ${type === TYPE.HOME ? 'home screen' : type === TYPE.LOCK ? 'lock screen' : 'both screens'}!`),
-            type
-        );
+    const setWallpaper = async (type) => {
+        try {
+            setLoading(true);
+            await ManageWallpaper.setWallpaper(
+                {
+                    uri: imageUrl,
+                },
+                () => {
+                    setLoading(false);
+                    Alert.alert('Success', `Wallpaper set successfully on ${type === TYPE.HOME ? 'home screen' : type === TYPE.LOCK ? 'lock screen' : 'both screens'}!`);
+                },
+                type
+            );
+        } catch (error) {
+            setLoading(false);
+            console.error(error);
+            Alert.alert('Error', 'Failed to set wallpaper. Please try again.');
+        }
     };
 
     return (
@@ -96,6 +107,11 @@ const ImageScreen = ({ route }) => {
             blurType="light"
             blurAmount={8}
         >
+            {loading && (
+                <View style={styles.container}>
+                    <ActivityIndicator size="large" color={COLORS.primary} />
+                </View>
+            )}
             <View style={styles.container}>
                 <Image source={{ uri: imageUrl }} transition={100} style={styles.image} />
                 <View style={styles.buttons}>
@@ -227,7 +243,19 @@ const styles = StyleSheet.create({
         fontSize: hp(2.2),
         color: COLORS.darkgray1,
         marginHorizontal: wp(3)
-    }
+    },
+    loadingOverlay: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        justifyContent: 'center',
+        alignItems: 'center',
+        zIndex: 10, // Ensure this value is higher than the z-index of the image
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    },
+
 });
 
 export default ImageScreen;

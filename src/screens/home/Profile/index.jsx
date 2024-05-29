@@ -68,16 +68,17 @@ const Profile = ({ navigation }) => {
                 </View>
 
                 <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: hp(3) }}>
-                    <Image source={{ uri: userInfo?.user.photo }} style={{ width: wp(17), height: wp(17), borderRadius: wp(17) }} />
+                    <Image source={{ uri: userInfo?.user?.photo || userInfo?.photoURL }} style={{ width: wp(17), height: wp(17), borderRadius: wp(17) }} />
                     <View>
                         <Text style={{
                             fontFamily: fontFamily.FONTS.Medium,
                             fontSize: hp(2.5),
                             color: COLORS.black,
                             marginHorizontal: wp(22),
-                        }}>{userInfo?.user?.name}</Text>
+                        }}>{userInfo?.user?.name || userInfo?.displayName}</Text>
                     </View>
                 </View>
+
             </View>
             <View>
                 <Text style={{ padding: wp(2), fontSize: hp(2.9), color: COLORS.secondaryBlack, fontWeight: '800' }}>Recent Activity</Text>
@@ -86,7 +87,7 @@ const Profile = ({ navigation }) => {
                     horizontal
                     keyExtractor={item => item.id}
                     renderItem={({ item }) => (
-                        <TouchableOpacity activeOpacity={0.7}>
+                        <TouchableOpacity activeOpacity={0.7} onPress={() => navigation.navigate('ImageScreen', { imageUrl: item.src.original })}>
                             <View style={{ justifyContent: 'space-between', alignItems: 'center', marginHorizontal: wp(1), }}>
                                 <Image source={{ uri: item?.src?.original }} style={{ width: wp(29), height: hp(22), borderRadius: wp(2), }} />
                             </View>
