@@ -1,6 +1,8 @@
-import { FlatList, Image, SafeAreaView, ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, View, Animated, Easing, ActivityIndicator } from 'react-native'
+import { FlatList, Image, SafeAreaView, ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, View, Animated, Easing, ActivityIndicator, TextInput } from 'react-native'
 import React, { useEffect, useState, useRef, useMemo } from 'react'
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
+import AntDesign from 'react-native-vector-icons/AntDesign'
+import Entypo from 'react-native-vector-icons/Entypo'
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
 import { COLORS } from '../../../../constants'
 import {
@@ -11,22 +13,43 @@ import FastImage from 'react-native-fast-image';
 import { fetchWallpapers } from '../../../redux/actions/wallpapersActions'
 import { useDispatch, useSelector } from 'react-redux'
 import { addRecentActivity } from '../../../redux/actions/recentActivityAction'
+import fontFamily from '../../../../constants/fontFamily'
 
 const Home = ({ navigation }) => {
 
     const dispatch = useDispatch();
     const { wallpapers, loading } = useSelector((state) => state.wallpapers);
+    const [searchVisible, setSearchVisible] = useState(false);
+    const [searchText, setSearchText] = useState('');
+    const defaultSearchText = 'mobile wallpaper';
+
+    // console.log(searchText.trim().length)
 
     const handleEndReached = () => {
         if (!loading) {
             const nextPage = Math.ceil(wallpapers.length / 80) + 1;
-            dispatch(fetchWallpapers(nextPage));
+            dispatch(fetchWallpapers(searchText || defaultSearchText, nextPage));
         }
     };
 
     const handleImagePress = (item) => {
         dispatch(addRecentActivity(item));
         navigation.navigate('ImageScreen', { imageUrl: item.src.original });
+    };
+
+    const toggleInput = () => {
+        setSearchVisible(!searchVisible);
+    };
+
+    const clearSearch = () => {
+        setSearchText('');
+        dispatch(fetchWallpapers(defaultSearchText, 1, true));
+    };
+
+    const handleSearch = () => {
+        if (searchText.trim().length > 0) {
+            dispatch(fetchWallpapers(searchText, 1, true));
+        }
     };
 
     const MemoizedImageItem = useMemo(() => {
@@ -50,17 +73,53 @@ const Home = ({ navigation }) => {
     return (
         <SafeAreaView style={{ flex: 1 }}>
             <StatusBar backgroundColor={COLORS.tertiaryWhite} barStyle="dark-content" />
-            <View style={{ margin: hp(2), marginTop: hp(2), }}>
-                <View style={{ justifyContent: 'space-between', alignItems: 'center', flexDirection: 'row' }}>
-                    <View style={{ flexDirection: 'row' }}>
-                        <MaterialIcons name="rule" size={hp(3.8)} color={COLORS.darkgray1} />
-                        <Text style={{ paddingHorizontal: wp(2), fontSize: hp(2.8), color: COLORS.secondaryBlack, fontWeight: '700' }}>PixelVista</Text>
+            {searchVisible ? (
+                <View style={{ shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.25, shadowRadius: 3.84, elevation: 7 }}>
+                    <View style={{ width: '90%', marginVertical: hp(1), marginHorizontal: wp(5), flexDirection: 'row', justifyContent: 'center', backgroundColor: '#e8e8e8', borderRadius: wp(4) }}>
+                        <TouchableOpacity onPress={toggleInput} style={{ marginLeft: wp(10) }}>
+                            <AntDesign name="arrowleft" size={hp(3)} color={COLORS.black} style={{ position: 'absolute', left: 10, top: 10 }} />
+                        </TouchableOpacity>
+                        <TextInput
+                            placeholder="Search..."
+                            placeholderTextColor={COLORS.darkgray1}
+                            keyboardType="default"
+                            autoFocus={true}
+                            value={searchText}
+                            style={{ width: '100%', marginLeft: wp(10), height: hp(6), color: COLORS.darkgray, fontFamily: fontFamily.FONTS.regular, }}
+                            onChangeText={(text) => setSearchText(text)}
+                            onSubmitEditing={handleSearch}
+                        />
+                        {searchText.length > 0 && ( // Conditionally render the cross icon
+                            <TouchableOpacity onPress={clearSearch} style={{ position: 'absolute', right: 10, top: 10 }}>
+                                <Entypo name="cross" size={hp(3)} color={COLORS.black} />
+                            </TouchableOpacity>
+                        )}
                     </View>
-                    <TouchableOpacity>
-                        <MaterialCommunityIcons name="cards-heart-outline" size={hp(3.5)} color={COLORS.secondaryBlack} />
-                    </TouchableOpacity>
                 </View>
-            </View>
+            ) : (
+                <View>
+                    <View style={{
+                        shadowColor: '#000',
+                        shadowOffset: { width: 0, height: 2 },
+                        shadowOpacity: 0.25,
+                        shadowRadius: 3.84,
+                        elevation: 5,
+                        paddingVertical: hp(1),
+                        backgroundColor: COLORS.white,
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        flexDirection: 'row'
+                    }}>
+                        <View style={{ flexDirection: 'row', padding: hp(1) }}>
+                            <MaterialIcons name="rule" size={hp(3.8)} color={COLORS.darkgray1} />
+                            <Text style={{ paddingHorizontal: wp(2), fontSize: hp(2.8), color: COLORS.secondaryBlack, fontWeight: '700' }}>PixelVista</Text>
+                        </View>
+                        <TouchableOpacity onPress={toggleInput} style={{ marginHorizontal: wp(3) }}>
+                            <MaterialIcons name="search" size={hp(4.2)} color={COLORS.darkgray} />
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            )}
 
 
             <View style={{ marginVertical: hp(1), marginBottom: hp(7) }}>

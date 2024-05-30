@@ -56,11 +56,11 @@ const TabStack = () => {
       }} />
       <Tab.Screen name="Search" component={Search} options={{
         headerShown: false,
-        tabBarLabel: 'Search',
+        tabBarLabel: 'WhishList',
         tabBarIcon: ({ focused, color, size }) => (
           <View style={{ alignItems: 'center' }}>
-            {focused ? <MaterialIcons name="search" size={hp(4.2)} color={COLORS.darkgray} /> : <MaterialIcons name="search" size={hp(4.2)} color={color} />}
-            {focused && <Text style={{ color: COLORS.black, fontWeight: '700', fontSize: hp(1.8) }}>Search</Text>}
+            {focused ? <MaterialCommunityIcons name="cards-heart-outline" size={hp(3.5)} color={COLORS.secondaryBlack} /> : <MaterialCommunityIcons name="cards-heart-outline" size={hp(3.5)} color={color} />}
+            {focused && <Text style={{ color: COLORS.black, fontWeight: '700', fontSize: hp(1.8) }}>WhishList</Text>}
           </View>
         ),
       }} />

@@ -20,7 +20,7 @@ const SplashScreen = ({ navigation }) => {
                     photoURL: currentUser.photoURL,
                 };
                 dispatch(loginSuccess(userInfo));
-                dispatch(fetchWallpapers(1));
+                dispatch(fetchWallpapers('mobile wallpaper',1));
                 navigation.replace('TabStack');
             } else {
                 // If no user is signed in, navigate to 'Login'

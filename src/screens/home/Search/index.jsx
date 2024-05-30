@@ -15,9 +15,9 @@ import AntDesign from 'react-native-vector-icons/AntDesign'
 const Search = () => {
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      <View style={{ margin: hp(2), marginTop: hp(2), }}>
-        <View style={{ justifyContent: 'space-between', alignItems: 'center', flexDirection: 'row' }}>
-          <View style={{ flexDirection: 'row' }}>
+      <View>
+        <View style={{ paddingVertical: hp(1), backgroundColor: COLORS.white, justifyContent: 'space-between', alignItems: 'center', flexDirection: 'row' }}>
+          <View style={{ flexDirection: 'row', padding: hp(1) }}>
             <MaterialIcons name="rule" size={hp(3.8)} color={COLORS.darkgray1} />
             <Text style={{ paddingHorizontal: wp(2), fontSize: hp(2.8), color: COLORS.secondaryBlack, fontWeight: '700' }}>PixelVista</Text>
           </View>

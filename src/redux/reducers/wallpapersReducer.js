@@ -12,12 +12,28 @@ const wallpapersReducer = (state = initialState, action) => {
                 loading: true,
                 error: null,
             };
+        // case 'FETCH_WALLPAPERS_SUCCESS':
+        //     return {
+        //         ...state,
+        //         loading: false,
+        //         wallpapers: [...state.wallpapers, ...action.payload],
+        //     };
         case 'FETCH_WALLPAPERS_SUCCESS':
-            return {
-                ...state,
-                loading: false,
-                wallpapers: [...state.wallpapers, ...action.payload],
-            };
+            if (action.payload.isSearch) {
+                // Replace existing wallpapers with new ones for search
+                return {
+                    ...state,
+                    loading: false,
+                    wallpapers: action.payload.photos,
+                };
+            } else {
+                // Concatenate new wallpapers with existing ones for pagination
+                return {
+                    ...state,
+                    loading: false,
+                    wallpapers: [...state.wallpapers, ...action.payload.photos],
+                };
+            }
         case 'FETCH_WALLPAPERS_FAILURE':
             return {
                 ...state,

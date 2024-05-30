@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { View, Image, StyleSheet, TouchableOpacity, Text, Share, PermissionsAndroid, Alert, Platform, ToastAndroid, ActivityIndicator } from 'react-native';
 import { BlurView } from '@react-native-community/blur';
 import { useNavigation } from '@react-navigation/native';
@@ -33,6 +33,12 @@ const ImageScreen = ({ route }) => {
     const handleDownload = () => {
         rbSheetRef.current.open();
     }
+
+    useEffect(() => {
+        if (loading && rbSheetRef.current) {
+            rbSheetRef.current.close();
+        }
+    }, [loading]);
 
     const saveImageToMediaFolder = async (imageUrl) => {
         try {
@@ -107,11 +113,6 @@ const ImageScreen = ({ route }) => {
             blurType="light"
             blurAmount={8}
         >
-            {loading && (
-                <View style={styles.container}>
-                    <ActivityIndicator size="large" color={COLORS.primary} />
-                </View>
-            )}
             <View style={styles.container}>
                 <Image source={{ uri: imageUrl }} transition={100} style={styles.image} />
                 <View style={styles.buttons}>
@@ -119,7 +120,13 @@ const ImageScreen = ({ route }) => {
                         <Entypo name="cross" size={hp(4)} color={COLORS.white} />
                     </TouchableOpacity>
                     <TouchableOpacity style={styles.button} onPress={() => handleDownload()} >
-                        <Octicons name="download" size={hp(3.5)} color={COLORS.white} />
+                        {loading ? (
+                            <View style={styles.loadingOverlay}>
+                                <ActivityIndicator size="large" color={COLORS.primary} />
+                            </View>
+                        ) : (
+                            <Octicons name="download" size={hp(3.5)} color={COLORS.white} />
+                        )}
                     </TouchableOpacity>
                     <TouchableOpacity style={styles.button} onPress={() => handleShare(imageUrl)} >
                         <Entypo name="share" size={hp(3.5)} color={COLORS.white} />
@@ -254,6 +261,8 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         zIndex: 10, // Ensure this value is higher than the z-index of the image
         backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        borderRadius: wp(2),
+        borderCurve: 'continuous'
     },
 
 });
