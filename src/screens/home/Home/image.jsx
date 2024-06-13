@@ -90,13 +90,32 @@ const ImageScreen = ({ route }) => {
     const setWallpaper = async (type) => {
         try {
             setLoading(true);
+
+            if (Platform.OS === 'android' && type === TYPE.LOCK && Platform.Version < 24) {
+                setLoading(false);
+                Alert.alert('Error', 'Setting the wallpaper on the lock screen is not supported on Android versions below Nougat.');
+                return;
+            }
+
             await ManageWallpaper.setWallpaper(
                 {
                     uri: imageUrl,
                 },
-                () => {
+                (status) => {
                     setLoading(false);
-                    Alert.alert('Success', `Wallpaper set successfully on ${type === TYPE.HOME ? 'home screen' : type === TYPE.LOCK ? 'lock screen' : 'both screens'}!`);
+                    if (status) {
+                        let screenType = '';
+                        if (type === TYPE.HOME) {
+                            screenType = 'home screen';
+                        } else if (type === TYPE.LOCK) {
+                            screenType = 'lock screen';
+                        } else if (type === TYPE.BOTH) {
+                            screenType = 'both screens';
+                        }
+                        Alert.alert('Success', `Wallpaper set successfully on ${screenType}`);
+                    } else {
+                        Alert.alert('Error', 'Failed to set wallpaper. Please try again.');
+                    }
                 },
                 type
             );
@@ -106,6 +125,7 @@ const ImageScreen = ({ route }) => {
             Alert.alert('Error', 'Failed to set wallpaper. Please try again.');
         }
     };
+
 
     return (
         <BlurView

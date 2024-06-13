@@ -3,7 +3,7 @@ export const fetchWallpapers = (query, page, isSearch) => async (dispatch) => {
     try {
         const response = await fetch(`https://api.pexels.com/v1/search?query=${query}&per_page=50&page=${page}`, {
             headers: {
-                Authorization:process.env.AUTHORIZATION,
+                Authorization: 'QXMTh7DwFambKiqqnhj2PkyROns0cCWkXruMC5Diw95DsmdSBCDlqjEB',
             },
         });
         const data = await response.json();

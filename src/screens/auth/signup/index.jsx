@@ -1,10 +1,22 @@
-import { Button, KeyboardAvoidingView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
-import React from 'react'
-import { ScrollView } from 'react-native-gesture-handler'
+import { Button, Image, KeyboardAvoidingView, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
+import React, { useEffect, useState } from 'react'
+import {
+    heightPercentageToDP as hp,
+    widthPercentageToDP as wp,
+} from '../../../Components/Pixel/Index'
+import { COLORS } from '../../../../constants'
 import { SigninWithGoogle } from '../../../config/firebase/GoogleSignin'
 import Toast from 'react-native-toast-message'
+import { useDispatch, useSelector } from 'react-redux'
+import { loginWithGoogle } from '../../../redux/actions/loginAction'
+import { fetchWallpapers } from '../../../redux/actions/wallpapersActions'
+import { EmailSignup } from '../../../config/firebase/EmailSignin'
 
 const Signup = ({ navigation }) => {
+
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
 
     const handleGoogleSignIn = async () => {
         try {
@@ -35,40 +47,57 @@ const Signup = ({ navigation }) => {
         }
     };
 
+    const handleSignup = async () => {
+        if (password !== confirmPassword) {
+            alert("Passwords do not match!");
+            return;
+        }
+
+        try {
+            await EmailSignup({ email, password }); // Call the signup function if passwords match
+            navigation.navigate('Login');
+        } catch (error) {
+            console.error('Error during signup:', error);
+            alert('Error during signup. Please try again.');
+        }
+    };
+
 
     return (
-        <KeyboardAvoidingView style={{ flex: 1 }} behavior='padding'>
+        <KeyboardAvoidingView style={{ flex: 1 }} behavior='position'>
             <ScrollView contentContainerStyle={{ flexGrow: 1 }} showsVerticalScrollIndicator={false}>
-                <View style={{ flex: 1, marginVertical: 30 }}>
-                    <View style={{ flex: 1, marginLeft: 10, marginRight: 10 }}>
+                <View style={{ flex: 1, marginVertical: hp(3.7) }}>
+                    <View style={{ flex: 1, marginLeft: wp(5), marginRight: wp(5) }}>
                         <View>
-                            <Text style={{ fontSize: 23, fontWeight: '700', color: 'black' }}>Welcome! 👋</Text>
-                            <Text style={{ paddingVertical: 8, fontSize: 16, fontWeight: '300', color: 'black' }}>We're glad you're here. Sign up to get started!</Text>
+                            <Text style={{ fontSize: hp(3.7), fontWeight: '700', color: 'black' }}>Welcome! 👋</Text>
+                            <Text style={{ paddingVertical: hp(0.5), fontSize: hp(2.2), fontWeight: '300', color: 'black' }}>We're glad you're here. Sign up to get started!</Text>
                         </View>
 
-                        <View style={{ marginVertical: 10, }}>
+                        <View style={{ marginVertical: hp(2), }}>
                             <View>
                                 <Text style={{
                                     color: 'black',
-                                    fontSize: 16,
+                                    fontSize: hp(2.2),
                                     fontWeight: '400',
-                                    marginTop: 16,
-                                    marginBottom: 5,
+                                    marginTop: hp(2.2),
+                                    marginBottom: hp(0.8),
                                 }}>Email Address</Text>
                                 <View style={{
                                     width: '100%',
-                                    height: 48,
-                                    borderColor: 'black',
+                                    height: hp(6.3),
+                                    borderColor: COLORS.black,
                                     borderWidth: 0.5,
-                                    borderRadius: 10,
+                                    borderRadius: wp(2),
                                     alignItems: 'center',
                                     justifyContent: 'center',
-                                    paddingLeft: 10,
+                                    paddingLeft: wp(2),
                                 }}>
                                     <TextInput
                                         placeholder='Enter your Email'
                                         placeholderTextColor={'gray'}
                                         keyboardType='email'
+                                        value={email}
+                                        onChangeText={text => setEmail(text)}
                                         style={{ width: '100%', color: 'black' }}
                                     />
                                 </View>
@@ -77,34 +106,65 @@ const Signup = ({ navigation }) => {
                             <View>
                                 <Text style={{
                                     color: 'black',
-                                    fontSize: 16,
+                                    fontSize: hp(2.2),
                                     fontWeight: '400',
-                                    marginTop: 16,
-                                    marginBottom: 5,
+                                    marginTop: hp(2.2),
+                                    marginBottom: hp(0.8),
                                 }}>Password</Text>
                                 <View style={{
                                     width: '100%',
-                                    height: 48,
-                                    borderColor: 'black',
+                                    height: hp(6.3),
+                                    borderColor: COLORS.black,
                                     borderWidth: 0.5,
-                                    borderRadius: 10,
+                                    borderRadius: wp(2),
                                     alignItems: 'center',
                                     justifyContent: 'center',
-                                    paddingLeft: 10,
+                                    paddingLeft: wp(2),
                                 }}>
                                     <TextInput
                                         placeholder='Enter your Password'
                                         placeholderTextColor={'gray'}
                                         keyboardType='visible-password'
+                                        value={password}
+                                        onChangeText={text => setPassword(text)}
+                                        style={{ width: '100%', color: 'black' }}
+                                    />
+                                </View>
+                            </View>
+                            <View>
+                                <Text style={{
+                                    color: 'black',
+                                    fontSize: hp(2.2),
+                                    fontWeight: '400',
+                                    marginTop: hp(2.2),
+                                    marginBottom: hp(0.8),
+                                }}>Confirm Password</Text>
+                                <View style={{
+                                    width: '100%',
+                                    height: hp(6.3),
+                                    borderColor: COLORS.black,
+                                    borderWidth: 0.5,
+                                    borderRadius: wp(2),
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    paddingLeft: wp(2),
+                                }}>
+                                    <TextInput
+                                        placeholder='Enter your Password'
+                                        placeholderTextColor={'gray'}
+                                        keyboardType='visible-password'
+                                        value={confirmPassword}
+                                        onChangeText={text => setConfirmPassword(text)}
                                         style={{ width: '100%', color: 'black' }}
                                     />
                                 </View>
                             </View>
 
-                            <View style={{ marginVertical: 20 }}></View>
-                            <TouchableOpacity style={{ backgroundColor: 'lightblue', borderRadius: 10, justifyContent: 'center', alignItems: 'center' }}>
-                                <Text style={{ fontSize: 18, paddingVertical: 7 }}>Signup</Text>
-                            </TouchableOpacity>
+                            <View style={{ marginVertical: hp(3) }}>
+                                <TouchableOpacity style={{ backgroundColor: 'lightblue', borderRadius: wp(2), justifyContent: 'center', alignItems: 'center' }} onPress={handleSignup}>
+                                    <Text style={{ fontSize: hp(2.4), paddingVertical: hp(1.5) }}>Signup</Text>
+                                </TouchableOpacity>
+                            </View>
                         </View>
 
                         <View style={styles.lineText}>
@@ -119,7 +179,7 @@ const Signup = ({ navigation }) => {
                             </TouchableOpacity>
                         </View>
 
-                        <View style={{ marginVertical: hp(3), justifyContent: 'center', flexDirection: 'row', alignItems: 'center' }}>
+                        <View style={{ marginVertical: hp(5), justifyContent: 'center', flexDirection: 'row', alignItems: 'center' }}>
 
                             <TouchableOpacity style={{ marginHorizontal: wp(3), paddingHorizontal: wp(4), flexDirection: 'row', borderRadius: wp(2), borderWidth: hp(0.2), borderColor: COLORS.gray, padding: hp(0.5), alignItems: 'center' }} onPress={() => handleGoogleSignIn()}>
                                 <Image source={require("../../../../assets/images/google.png")} style={{ height: hp(5), width: wp(10) }} />
@@ -144,10 +204,10 @@ const styles = StyleSheet.create({
     linkContainer: {
         flexDirection: 'row',
         justifyContent: 'center',
-        marginTop: 20,
+        marginTop: hp(3),
     },
     linkText: {
-        fontSize: 16,
+        fontSize: hp(2.2),
         color: 'black',
 
     },
@@ -157,14 +217,14 @@ const styles = StyleSheet.create({
     },
     link: {
         color: '#037f51',
-        fontSize: 16,
+        fontSize: hp(2.2),
         fontWeight: 'bold',
     },
     lineText: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-        marginTop: 30,
+        marginTop: hp(3),
     },
     line: {
         flex: 1,
@@ -172,8 +232,8 @@ const styles = StyleSheet.create({
         backgroundColor: 'black',
     },
     text: {
-        width: 30,
-        fontSize: 18,
+        width: wp(10),
+        fontSize: hp(2.4),
         color: 'black',
         textAlign: 'center',
     },

@@ -25,6 +25,11 @@ const Home = ({ navigation }) => {
 
     // console.log(searchText.trim().length)
 
+    // useEffect(() => {
+    //     dispatch(fetchWallpapers(defaultSearchText, 1));
+    // }, [])
+
+
     const handleEndReached = () => {
         if (!loading) {
             const nextPage = Math.ceil(wallpapers.length / 80) + 1;

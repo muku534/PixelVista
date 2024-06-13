@@ -1,5 +1,5 @@
 import { Button, Image, KeyboardAvoidingView, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import {
     heightPercentageToDP as hp,
     widthPercentageToDP as wp,
@@ -8,14 +8,17 @@ import { COLORS } from '../../../../constants'
 import { SigninWithGoogle } from '../../../config/firebase/GoogleSignin'
 import Toast from 'react-native-toast-message'
 import { useDispatch, useSelector } from 'react-redux'
-import { loginWithGoogle } from '../../../redux/actions/loginAction'
+import { loginSuccess, loginWithGoogle } from '../../../redux/actions/loginAction'
 import { fetchWallpapers } from '../../../redux/actions/wallpapersActions'
+import { EmailSignin } from '../../../config/firebase/EmailSignin'
 
 const Login = ({ navigation }) => {
 
     const dispatch = useDispatch();
     const user = useSelector(state => state.user.userInfo);
     const loading = useSelector(state => state.user.loading);
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
 
     const handleGoogleSignIn = async () => {
         dispatch(loginWithGoogle());
@@ -23,7 +26,7 @@ const Login = ({ navigation }) => {
 
     useEffect(() => {
         if (user) {
-            dispatch(fetchWallpapers(1));
+            dispatch(fetchWallpapers('mobile wallpaper', 1));
             Toast.show({
                 type: 'success',
                 text1: `Welcome Back ${user.displayName}`,
@@ -34,40 +37,54 @@ const Login = ({ navigation }) => {
     }, [user, dispatch, navigation]);
 
 
+    const handleEmailSignin = async () => {
+        try {
+            await EmailSignin({ email, password });
+            // dispatch(loginSuccess(userInfo));
+            dispatch(fetchWallpapers('mobile wallpaper', 1))
+            console.log('login succesfully')
+            navigation.navigate('TabStack')
+        } catch (error) {
+            console.log('somthing went wrong', error)
+        }
+    }
+
     return (
-        <KeyboardAvoidingView style={{ flex: 1 }} behavior='padding'>
+        <KeyboardAvoidingView style={{ flex: 1 }} behavior='position'>
             <ScrollView contentContainerStyle={{ flexGrow: 1 }} showsVerticalScrollIndicator={false}>
-                <View style={{ flex: 1, marginVertical: 40 }}>
-                    <View style={{ flex: 1, marginLeft: 10, marginRight: 10 }}>
+                <View style={{ flex: 1, marginVertical: hp(6) }}>
+                    <View style={{ flex: 1, marginLeft: wp(5), marginRight: wp(5) }}>
                         <View>
-                            <Text style={{ fontSize: 23, fontWeight: '700', color: 'black' }}>Hi Welcome Back ! 👋</Text>
-                            <Text style={{ paddingVertical: 8, fontSize: 16, fontWeight: '300', color: 'black' }}>Hello again you have been missed!</Text>
+                            <Text style={{ fontSize: hp(3.7), fontWeight: '700', color: 'black' }}>Hi Welcome Back ! 👋</Text>
+                            <Text style={{ paddingVertical: hp(0.5), fontSize: hp(2.2), fontWeight: '300', color: 'black' }}>Hello again you have been missed!</Text>
                         </View>
 
-                        <View style={{ marginVertical: 10, }}>
+                        <View style={{ marginVertical: hp(2), }}>
                             <View>
                                 <Text style={{
                                     color: 'black',
-                                    fontSize: 16,
+                                    fontSize: hp(2.2),
                                     fontWeight: '400',
-                                    marginTop: 16,
-                                    marginBottom: 5,
+                                    marginTop: hp(2.2),
+                                    marginBottom: hp(0.8),
                                 }}>Email Address</Text>
                                 <View style={{
                                     width: '100%',
-                                    height: 48,
-                                    borderColor: 'black',
+                                    height: hp(6.3),
+                                    borderColor: COLORS.black,
                                     borderWidth: 0.5,
-                                    borderRadius: 10,
+                                    borderRadius: wp(2),
                                     alignItems: 'center',
                                     justifyContent: 'center',
-                                    paddingLeft: 10,
+                                    paddingLeft: wp(2),
                                 }}>
                                     <TextInput
                                         placeholder='Enter your Email'
                                         placeholderTextColor={'gray'}
                                         keyboardType='email'
                                         style={{ width: '100%', color: 'black' }}
+                                        value={email}
+                                        onChangeText={text => setEmail(text)}
                                     />
                                 </View>
                             </View>
@@ -75,34 +92,37 @@ const Login = ({ navigation }) => {
                             <View>
                                 <Text style={{
                                     color: 'black',
-                                    fontSize: 16,
+                                    fontSize: hp(2.2),
                                     fontWeight: '400',
-                                    marginTop: 16,
-                                    marginBottom: 5,
+                                    marginTop: hp(2.2),
+                                    marginBottom: hp(0.8),
                                 }}>Password</Text>
                                 <View style={{
                                     width: '100%',
-                                    height: 48,
-                                    borderColor: 'black',
+                                    height: hp(6.3),
+                                    borderColor: COLORS.black,
                                     borderWidth: 0.5,
-                                    borderRadius: 10,
+                                    borderRadius: wp(2),
                                     alignItems: 'center',
                                     justifyContent: 'center',
-                                    paddingLeft: 10,
+                                    paddingLeft: wp(2),
                                 }}>
                                     <TextInput
                                         placeholder='Enter your Password'
                                         placeholderTextColor={'gray'}
                                         keyboardType='visible-password'
                                         style={{ width: '100%', color: 'black' }}
+                                        value={password}
+                                        onChangeText={text => setPassword(text)}
                                     />
                                 </View>
                             </View>
 
-                            <View style={{ marginVertical: 20 }}></View>
-                            <TouchableOpacity style={{ backgroundColor: 'lightblue', borderRadius: 10, justifyContent: 'center', alignItems: 'center' }} onPress={() => navigation.navigate("TabStack")}>
-                                <Text style={{ fontSize: 18, paddingVertical: 7, color: 'black', fontWeight: '600' }}>Login</Text>
-                            </TouchableOpacity>
+                            <View style={{ marginVertical: hp(3) }}>
+                                <TouchableOpacity style={{ backgroundColor: 'lightblue', borderRadius: 10, justifyContent: 'center', alignItems: 'center' }} onPress={handleEmailSignin}>
+                                    <Text style={{ fontSize: hp(2.4), paddingVertical: hp(1.5), color: COLORS.darkgray1, fontWeight: '600' }}>Login</Text>
+                                </TouchableOpacity>
+                            </View>
                         </View>
 
                         <View style={styles.lineText}>
@@ -117,7 +137,7 @@ const Login = ({ navigation }) => {
                             </TouchableOpacity>
                         </View>
 
-                        <View style={{ marginVertical: hp(3), justifyContent: 'center', flexDirection: 'row', alignItems: 'center' }}>
+                        <View style={{ marginVertical: hp(5), justifyContent: 'center', flexDirection: 'row', alignItems: 'center' }}>
 
                             <TouchableOpacity style={{ marginHorizontal: wp(3), paddingHorizontal: wp(4), flexDirection: 'row', borderRadius: wp(2), borderWidth: hp(0.2), borderColor: COLORS.gray, padding: hp(0.5), alignItems: 'center' }} onPress={() => handleGoogleSignIn()}>
                                 <Image source={require("../../../../assets/images/google.png")} style={{ height: hp(5), width: wp(10) }} />
@@ -142,10 +162,10 @@ const styles = StyleSheet.create({
     linkContainer: {
         flexDirection: 'row',
         justifyContent: 'center',
-        marginTop: 20,
+        marginTop: hp(3),
     },
     linkText: {
-        fontSize: 16,
+        fontSize: hp(2.2),
         color: 'black',
 
     },
@@ -155,23 +175,23 @@ const styles = StyleSheet.create({
     },
     link: {
         color: '#037f51',
-        fontSize: 16,
+        fontSize: hp(2.2),
         fontWeight: 'bold',
     },
     lineText: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-        marginTop: 30,
+        marginTop: hp(1),
     },
     line: {
         flex: 1,
         height: 1,
-        backgroundColor: 'black',
+        backgroundColor: COLORS.darkgray1,
     },
     text: {
-        width: 30,
-        fontSize: 18,
+        width: wp(10),
+        fontSize: hp(2.4),
         color: 'black',
         textAlign: 'center',
     },

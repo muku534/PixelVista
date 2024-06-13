@@ -63,7 +63,7 @@ yarn-error.log
 .metro-health-check*
 
 android/app/google-services.json
-
+android
 .env
 .env.local
 key_store.jks

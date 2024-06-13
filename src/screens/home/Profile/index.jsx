@@ -49,20 +49,30 @@ const Profile = ({ navigation }) => {
                     </View>
                 </View>
 
-                <View style={{ margin: hp(2), flexDirection: 'row', alignItems: 'center', marginTop: hp(3) }}>
-                    <Image source={{ uri: userInfo?.user?.photo || userInfo?.photoURL }} style={{ width: wp(17), height: wp(17), borderRadius: wp(17) }} />
-                    <View>
-                        <Text style={{
-                            fontFamily: fontFamily.FONTS.Medium,
-                            fontSize: hp(2.5),
-                            color: COLORS.black,
-                            marginHorizontal: wp(12),
-                        }}>{userInfo?.user?.name || userInfo?.displayName}</Text>
+                {userInfo ? (
+                    <View style={{ margin: hp(2), flexDirection: 'row', alignItems: 'center', marginTop: hp(3) }}>
+                        <Image source={{ uri: userInfo?.user?.photo || userInfo?.photoURL }} style={{ width: wp(17), height: wp(17), borderRadius: wp(17) }} />
+                        <View>
+                            <Text style={{
+                                fontFamily: fontFamily.FONTS.Medium,
+                                fontSize: hp(2.5),
+                                color: COLORS.black,
+                                marginHorizontal: wp(12),
+                            }}>{userInfo?.user?.name || userInfo?.displayName}</Text>
+                        </View>
                     </View>
-                </View>
+                ) : (
+                    <>
+                        <View style={{ marginVertical: hp(5), marginHorizontal: wp(10) }}>
+                            <TouchableOpacity style={{ backgroundColor: 'lightblue', borderRadius: 10, justifyContent: 'center', alignItems: 'center' }} onPress={() => navigation.navigate("Login")}>
+                                <Text style={{ fontSize: 18, paddingVertical: 7, color: 'black', fontWeight: '600' }}>Login</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </>
+                )}
 
             </View>
-            <View>
+            <View style={{ marginHorizontal: wp(3) }}>
                 <Text style={{ padding: wp(2), fontSize: hp(2.9), color: COLORS.secondaryBlack, fontWeight: '800' }}>Recent Activity</Text>
                 <FlatList
                     data={recentActivities}
@@ -145,21 +155,23 @@ const Profile = ({ navigation }) => {
                 </View>
             </View>
 
-            <TouchableOpacity onPress={handleLogout}>
-                <View style={{
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    marginTop: hp(6),
-                }}>
-                    <MaterialCommunityIcons name="logout-variant"
-                        size={hp(3)}
-                        color={COLORS.black} />
-                    <Text style={{ marginLeft: wp(2), color: 'red', fontFamily: fontFamily.FONTS.Medium, fontSize: hp(2.3) }}>
-                        Logout
-                    </Text>
-                </View>
-            </TouchableOpacity>
+            {userInfo && (
+                <TouchableOpacity onPress={handleLogout}>
+                    <View style={{
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        marginTop: hp(6),
+                    }}>
+                        <MaterialCommunityIcons name="logout-variant"
+                            size={hp(3)}
+                            color={COLORS.black} />
+                        <Text style={{ marginLeft: wp(2), color: 'red', fontFamily: fontFamily.FONTS.Medium, fontSize: hp(2.3) }}>
+                            Logout
+                        </Text>
+                    </View>
+                </TouchableOpacity>
+            )}
 
         </SafeAreaView>
     )
