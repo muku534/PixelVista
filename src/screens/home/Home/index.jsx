@@ -65,18 +65,54 @@ const Home = ({ navigation }) => {
         }
     };
 
-    // Memoized Image Component
-    const MemoizedImageItem = React.memo(({ item }) => (
-        <TouchableOpacity activeOpacity={0.7} onPress={() => handleImagePress(item)}>
-            <FastImage
-                source={{ uri: item.src.tiny, priority: FastImage.priority.high }}
-                style={styles.imageStyle}
-                resizeMode={FastImage.resizeMode.cover}
-                fallback
-                cacheControl={FastImage.cacheControl.immutable}
-            />
-        </TouchableOpacity>
-    ));
+    const MemoizedImageItem = React.memo(({ item }) => {
+        const [liked, setLiked] = useState(false);
+        const backgroundColorAnimation = useRef(new Animated.Value(0)).current;
+
+        const toggleLike = () => {
+            setLiked(!liked);
+
+            // Animate background color change
+            Animated.timing(backgroundColorAnimation, {
+                toValue: liked ? 0 : 1, // Toggle between 0 (transparent) and 1 (colored)
+                duration: 300,
+                useNativeDriver: false, // Required for color interpolation
+            }).start();
+        };
+
+        // Interpolate background color based on animation value
+        const animatedBackgroundColor = backgroundColorAnimation.interpolate({
+            inputRange: [0, 1],
+            outputRange: ['rgba(255, 255, 255, 0.3)', 'rgba(255, 0, 0, 0.7)'], // Transparent to red
+        });
+
+        return (
+            <View style={styles.imageWrapper}>
+                <TouchableOpacity activeOpacity={0.7} onPress={() => handleImagePress(item)}>
+                    <FastImage
+                        source={{ uri: item.src.tiny, priority: FastImage.priority.high }}
+                        style={styles.imageStyle}
+                        resizeMode={FastImage.resizeMode.cover}
+                        fallback
+                        cacheControl={FastImage.cacheControl.immutable}
+                    />
+                </TouchableOpacity>
+                <TouchableOpacity
+                    style={styles.heartButtonContainer}
+                    activeOpacity={0.6}
+                    onPress={toggleLike}
+                >
+                    <Animated.View style={[styles.heartButton, { backgroundColor: animatedBackgroundColor }]}>
+                        <AntDesign
+                            name={liked ? 'heart' : 'hearto'}
+                            size={hp(2.4)}
+                            color={COLORS.tertiaryWhite} // White heart icon
+                        />
+                    </Animated.View>
+                </TouchableOpacity>
+            </View>
+        );
+    });
 
     const handleImagePress = (item) => {
         dispatch(addRecentActivity(item));
@@ -234,15 +270,15 @@ const styles = StyleSheet.create({
         flex: 1,
         // justifyContent:'center',
         alignItems: 'center',
-        marginVertical: hp(1),
-        marginBottom: hp(7),
+        marginTop: hp(1),
+        // marginBottom: hp(7),
     },
     imageWrapper: {
-        marginHorizontal: wp(1.5),
-        marginBottom: hp(1),
+        marginHorizontal: wp(0.5),
+        marginBottom: hp(0.6),
     },
     imageStyle: {
-        width: wp(45),
+        width: wp(46),
         height: hp(30),
         borderRadius: wp(4),
     },
@@ -250,4 +286,18 @@ const styles = StyleSheet.create({
         marginVertical: hp(12),
         alignItems: 'center',
     },
+    heartButtonContainer: {
+        position: 'absolute',
+        bottom: hp(1), // Adjust based on image layout
+        right: wp(2), // Adjust based on image layout
+    },
+    heartButton: {
+        width: wp(9.5),
+        height: wp(9.5),
+        borderRadius: wp(9.5),
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'rgba(255, 255, 255, 0.3)', // Initial transparent background
+    },
+
 });

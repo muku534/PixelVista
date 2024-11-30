@@ -11,7 +11,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
 import Ionicons from 'react-native-vector-icons/Ionicons'
-import Search from './src/screens/home/Search';
+import Search from './src/screens/home/Collections';
 import Profile from './src/screens/home/Profile';
 import { COLORS } from './constants';
 import {
@@ -23,76 +23,14 @@ import Editor from './src/screens/home/editor';
 import { Provider, useSelector } from 'react-redux';
 import store from './src/redux/store';
 import ImageScreen from './src/screens/home/Home/image';
+import TabStack from './src/screens/navigation/BottomNavigation';
 
 const Stack = createStackNavigator();
-const Tab = createBottomTabNavigator();
-
-const TabStack = () => {
-  // const userData = useSelector(state => state.user_data);
-  return (
-    <Tab.Navigator
-      initialRouteName="HomeScreen"
-      screenOptions={{
-        tabBarShowLabel: false,
-        tabBarStyle: {
-          position: 'absolute',
-          width: '100%',
-          height: hp(7),
-          backgroundColor: '#fff',
-          // borderColor: '#000',
-          // borderWidth: 0,
-        },
-      }}
-    >
-      <Tab.Screen name="HomeScreen" component={Home} options={{
-        headerShown: false,
-        tabBarLabel: 'Home',
-        tabBarIcon: ({ focused, color, size }) => (
-          <View style={{ alignItems: 'center' }}>
-            {focused ? <MaterialCommunityIcons name="home" size={hp(4)} color={COLORS.darkgray} /> : <MaterialCommunityIcons name="home-outline" size={hp(4)} color={color} />}
-            {focused && <Text style={{ color: COLORS.black, fontWeight: '700', fontSize: hp(1.8) }}>Home</Text>}
-          </View>
-        ),
-      }} />
-      <Tab.Screen name="Search" component={Search} options={{
-        headerShown: false,
-        tabBarLabel: 'WhishList',
-        tabBarIcon: ({ focused, color, size }) => (
-          <View style={{ alignItems: 'center' }}>
-            {focused ? <MaterialCommunityIcons name="cards-heart-outline" size={hp(3.5)} color={COLORS.secondaryBlack} /> : <MaterialCommunityIcons name="cards-heart-outline" size={hp(3.5)} color={color} />}
-            {focused && <Text style={{ color: COLORS.black, fontWeight: '700', fontSize: hp(1.8) }}>WhishList</Text>}
-          </View>
-        ),
-      }} />
-      <Tab.Screen name="Editor" component={Editor} options={{
-        headerShown: false,
-        tabBarLabel: 'Editor',
-        tabBarIcon: ({ focused, color, size }) => (
-          <View style={{ alignItems: 'center' }}>
-            {focused ? <MaterialIcons name="mode-edit" size={hp(4)} color={COLORS.darkgray} /> : <MaterialIcons name="mode-edit-outline" size={hp(4)} color={color} />}
-            {focused && <Text style={{ color: COLORS.black, fontWeight: '700', fontSize: hp(1.8) }}>Design</Text>}
-          </View>
-        ),
-      }} />
-      <Tab.Screen name="Profile" component={Profile} options={{
-        headerShown: false,
-        tabBarLabel: 'Profile',
-        tabBarIcon: ({ focused, color, size }) => (
-          <View style={{ alignItems: 'center' }}>
-            {focused ? <MaterialCommunityIcons name="account" size={hp(4)} color={COLORS.darkgray} /> : <MaterialCommunityIcons name="account-outline" size={hp(4)} color={color} />}
-            {focused && <Text style={{ color: COLORS.black, fontWeight: '700', fontSize: hp(1.8) }}>Profile</Text>}
-          </View>
-        ),
-      }} />
-    </Tab.Navigator>
-  );
-};
 
 function App() {
 
   const [initialScreen, setInitialScreen] = useState('SplashScreen');
-
-
+  
   return (
     <Provider store={store}>
       <SafeAreaProvider>
