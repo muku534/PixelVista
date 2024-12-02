@@ -34,21 +34,8 @@ const Profile = ({ navigation }) => {
 
 
     return (
-        <SafeAreaView style={{ flex: 1 }}>
+        <SafeAreaView style={{ flex: 1,backgroundColor:COLORS.white }}>
             <View>
-                <View style={{
-                    shadowColor: '#000',
-                    shadowOffset: { width: 0, height: 2 },
-                    shadowOpacity: 0.25,
-                    shadowRadius: 3.84,
-                    elevation: 5, paddingVertical: hp(1), alignItems: 'center', flexDirection: 'row', backgroundColor: COLORS.white
-                }}>
-                    <View style={{ flexDirection: 'row', padding: hp(1) }}>
-                        <MaterialIcons name="rule" size={hp(3.8)} color={COLORS.darkgray1} />
-                        <Text style={{ paddingHorizontal: wp(2), fontSize: hp(2.8), color: COLORS.secondaryBlack, fontWeight: '700' }}>PixelVista</Text>
-                    </View>
-                </View>
-
                 {userInfo ? (
                     <View style={{ margin: hp(2), flexDirection: 'row', alignItems: 'center', marginTop: hp(3) }}>
                         <Image source={{ uri: userInfo?.user?.photo || userInfo?.photoURL }} style={{ width: wp(17), height: wp(17), borderRadius: wp(17) }} />

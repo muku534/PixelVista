@@ -1,11 +1,12 @@
 const initialState = {
-    collections: [], // Stores the collections
+    collections: [], // Stores the collections list
     loading: false,  // Tracks loading state
     error: null,     // Tracks errors
 };
 
 const collectionsReducer = (state = initialState, action) => {
     switch (action.type) {
+        // For fetching collections list
         case 'FETCH_COLLECTIONS_REQUEST':
             return {
                 ...state,

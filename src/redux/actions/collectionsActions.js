@@ -3,7 +3,7 @@ export const fetchCollection = (query, page, isSearch) => async (dispatch) => {
     try {
         const response = await fetch(`https://api.pexels.com/v1/collections/featured?per_page=10&page=${page}`, {
             headers: {
-                Authorization: '',
+                Authorization: process.env.AUTHORIZATION,
             },
         });
         const data = await response.json();

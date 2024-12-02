@@ -91,7 +91,7 @@ android {
             keyPassword 'android'
         }
          release {
-            storeFile file('key_store.jks')
+            storeFile file('../../key_store.jks')
             storePassword 'PIXELVISTA04112'
             keyAlias 'key0'
             keyPassword 'PIXELVISTA04112'

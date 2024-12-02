@@ -18,6 +18,7 @@ import fontFamily from '../../../../constants/fontFamily';
 
 const Home = ({ navigation }) => {
     const dispatch = useDispatch();
+    const userInfo = useSelector(state => state.user.userInfo);
     const { wallpapers, loading } = useSelector((state) => state.wallpapers);
     const [searchVisible, setSearchVisible] = useState(false);
     const [searchText, setSearchText] = useState('');
@@ -133,9 +134,9 @@ const Home = ({ navigation }) => {
             <StatusBar backgroundColor={COLORS.white} barStyle="dark-content" />
 
             <View style={[styles.header,]}>
-                <TouchableOpacity onPress={toggleInput}>
+                <TouchableOpacity onPress={() => navigation.navigate("Profile")} activeOpacity={0.6}>
                     <Image
-                        source={require("../../../../assets/images/user5.jpg")}
+                        source={{ uri: userInfo?.user?.photo || userInfo?.photoURL }}
                         resizeMode='contain'
                         style={styles.profileImage}
                     />
@@ -200,7 +201,7 @@ const Home = ({ navigation }) => {
                     ListFooterComponent={loading && <ActivityIndicator size="large" color={COLORS.primary} />}
                 />
             </View>
-        </SafeAreaView>
+        </SafeAreaView >
     );
 };
 

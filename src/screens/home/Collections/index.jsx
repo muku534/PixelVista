@@ -6,7 +6,7 @@ import { fetchCollection } from '../../../redux/actions/collectionsActions';
 import { COLORS } from '../../../../constants';
 import { heightPercentageToDP as hp, widthPercentageToDP as wp } from '../../../Components/Pixel/Index';
 
-const PEXELS_API_KEY = ''; // Replace with your actual Pexels API key
+const PEXELS_API_KEY = process.env.AUTHORIZATION; // Replace with your actual Pexels API key
 
 const Collections = ({ navigation }) => {
   const dispatch = useDispatch();
@@ -37,12 +37,13 @@ const Collections = ({ navigation }) => {
     });
   }, [collections]);
 
+
   const renderCollectionItem = ({ item }) => {
     const totalMedia = item.photos_count + item.videos_count;
     const coverImage = images[item.id] || 'https://via.placeholder.com/150';
 
     return (
-      <TouchableOpacity style={styles.imageWrapper} onPress={() => navigation.navigate('', { collectionId: item.id })} activeOpacity={0.6}>
+      <TouchableOpacity style={styles.imageWrapper} onPress={() => navigation.navigate('CollectionDetails', { collectionId: item.id })} activeOpacity={0.6} >
         <View style={styles.collectionCard}>
           <ImageBackground
             source={{ uri: coverImage }}
@@ -58,12 +59,15 @@ const Collections = ({ navigation }) => {
             </View>
           </ImageBackground>
         </View>
-      </TouchableOpacity>
+      </TouchableOpacity >
     );
   };
 
   return (
     <SafeAreaView style={styles.container}>
+      <View style={[styles.header,]}>
+        <Text style={styles.title}>Collection</Text>
+      </View>
       <View style={styles.collectionCard}>
         <FlatList
           data={collections}
@@ -89,6 +93,19 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.white,
     // padding: wp(3),
   },
+  header: {
+    // paddingVertical: hp(1),
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: hp(4),
+    paddingHorizontal: wp(4),
+  },
+  title: {
+    fontSize: hp(3),
+    fontWeight: '700',
+    color: COLORS.secondaryBlack,
+  },
   list: {
     paddingBottom: hp(5),
   },
@@ -101,7 +118,7 @@ const styles = StyleSheet.create({
   },
   imageWrapper: {
     marginHorizontal: wp(1),
-    marginBottom: hp(0.4),
+    marginBottom: hp(0.8),
   },
   collectionImageBackground: {
     width: wp(46),
