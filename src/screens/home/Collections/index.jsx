@@ -5,6 +5,7 @@ import axios from 'axios';
 import { fetchCollection } from '../../../redux/actions/collectionsActions';
 import { COLORS } from '../../../../constants';
 import { heightPercentageToDP as hp, widthPercentageToDP as wp } from '../../../Components/Pixel/Index';
+import LinearGradient from 'react-native-linear-gradient';
 
 const PEXELS_API_KEY = process.env.AUTHORIZATION; // Replace with your actual Pexels API key
 
@@ -43,7 +44,7 @@ const Collections = ({ navigation }) => {
     const coverImage = images[item.id] || 'https://via.placeholder.com/150';
 
     return (
-      <TouchableOpacity style={styles.imageWrapper} onPress={() => navigation.navigate('CollectionDetails', { collectionId: item.id })} activeOpacity={0.6} >
+      <TouchableOpacity style={styles.imageWrapper} onPress={() => navigation.navigate('CollectionDetails', { collectionId: item.id, collectionName: item.title })} activeOpacity={0.6} >
         <View style={styles.collectionCard}>
           <ImageBackground
             source={{ uri: coverImage }}
@@ -65,9 +66,11 @@ const Collections = ({ navigation }) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={[styles.header,]}>
-        <Text style={styles.title}>Collection</Text>
-      </View>
+      <LinearGradient colors={['#4A46E9', '#6E67F1']} style={styles.headerGradient}>
+        <View style={[styles.header,]}>
+          <Text style={styles.title}>Collection</Text>
+        </View>
+      </LinearGradient>
       <View style={styles.collectionCard}>
         <FlatList
           data={collections}
@@ -78,7 +81,7 @@ const Collections = ({ navigation }) => {
           contentContainerStyle={styles.list}
           onEndReached={() => setPage(page + 1)}
           onEndReachedThreshold={0.5}
-          ListFooterComponent={loading && <ActivityIndicator size="large" color={COLORS.primary} />}
+          ListFooterComponent={loading && <ActivityIndicator size="large" color={'#4A46E9'} />}
         />
       </View>
     </SafeAreaView>
@@ -91,30 +94,31 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: COLORS.white,
-    // padding: wp(3),
+  },
+  headerGradient: {
+    paddingBottom: hp(1),
+    borderBottomLeftRadius: wp(6),
+    borderBottomRightRadius: wp(6),
   },
   header: {
-    // paddingVertical: hp(1),
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    height: hp(4),
+    height: hp(7),
     paddingHorizontal: wp(4),
   },
   title: {
     fontSize: hp(3),
     fontWeight: '700',
-    color: COLORS.secondaryBlack,
+    color: COLORS.tertiaryWhite,
   },
   list: {
     paddingBottom: hp(5),
   },
   collectionCard: {
     flex: 1,
-    // justifyContent:'center',
     alignItems: 'center',
     marginTop: hp(1),
-    // marginBottom: hp(7),
   },
   imageWrapper: {
     marginHorizontal: wp(1),
