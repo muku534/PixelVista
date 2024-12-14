@@ -38,7 +38,15 @@ const wallpapersReducer = (state = initialState, action) => {
                 loading: false,
                 error: action.payload,
             };
-
+        case 'TOGGLE_LIKE':
+            return {
+                ...state,
+                wallpapers: state.wallpapers.map((wallpaper) =>
+                    wallpaper.id === action.payload
+                        ? { ...wallpaper, liked: !wallpaper.liked }
+                        : wallpaper
+                ),
+            };
         default:
             return state;
     }

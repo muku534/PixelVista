@@ -5,7 +5,7 @@ import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import Entypo from 'react-native-vector-icons/Entypo';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchWallpapers } from '../../../redux/actions/wallpapersActions';
+import { fetchWallpapers, toggleLike } from '../../../redux/actions/wallpapersActions';
 import { addRecentActivity } from '../../../redux/actions/recentActivityAction';
 import { COLORS } from '../../../../constants';
 import {
@@ -15,6 +15,7 @@ import {
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import Octicons from 'react-native-vector-icons/Octicons';
 import fontFamily from '../../../../constants/fontFamily';
+import LinearGradient from 'react-native-linear-gradient';
 
 const Home = ({ navigation }) => {
     const dispatch = useDispatch();
@@ -26,11 +27,13 @@ const Home = ({ navigation }) => {
     const opacityAnimation = useRef(new Animated.Value(1)).current;
     const defaultSearchText = 'mobile wallpaper';
     const [page, setPage] = useState(1);
+    const [debounceTimeout, setDebounceTimeout] = useState(null);
 
     // Initial Fetch
     useEffect(() => {
-        dispatch(fetchWallpapers(defaultSearchText, 1));
-    }, []);
+        dispatch(fetchWallpapers('mobile wallpaper', 1));
+        console.log(wallpapers)
+    }, [dispatch]);
 
     // Toggle Search Bar Visibility with Animation
     const toggleInput = () => {
@@ -41,14 +44,20 @@ const Home = ({ navigation }) => {
         }).start(() => setSearchVisible(!searchVisible));
     };
 
-
     // Handle search action
-    const handleSearch = () => {
-        if (searchText.trim()) {
-            dispatch(fetchWallpapers(searchText, 1, true));
-            setPage(1); // Reset pagination
+    const handleSearch = useCallback(() => {
+        if (debounceTimeout) {
+            clearTimeout(debounceTimeout);
         }
-    };
+        setDebounceTimeout(
+            setTimeout(() => {
+                if (searchText.trim()) {
+                    dispatch(fetchWallpapers(searchText, 1, true));
+                    setPage(1);
+                }
+            }, 300)
+        );
+    }, [searchText, dispatch, debounceTimeout]);
 
     // Clear the search
     const clearSearch = () => {
@@ -58,27 +67,29 @@ const Home = ({ navigation }) => {
     };
 
     // Handle pagination (load more wallpapers)
-    const handleEndReached = () => {
+    const handleEndReached = useCallback(() => {
         if (!loading) {
             const nextPage = page + 1;
             setPage(nextPage);
-            dispatch(fetchWallpapers(searchText || defaultSearchText, nextPage, false));
+            dispatch(fetchWallpapers(searchText || 'mobile wallpaper', nextPage, false));
         }
-    };
+    }, [page, loading, searchText, dispatch]);
 
-    const MemoizedImageItem = React.memo(({ item }) => {
-        const [liked, setLiked] = useState(false);
+    const MemoizedImageItem = React.memo(({ item, onToggleLike }) => {
+        const [isLiked, setIsLiked] = useState(item.liked)
         const backgroundColorAnimation = useRef(new Animated.Value(0)).current;
 
-        const toggleLike = () => {
-            setLiked(!liked);
-
-            // Animate background color change
+        useEffect(() => {
             Animated.timing(backgroundColorAnimation, {
-                toValue: liked ? 0 : 1, // Toggle between 0 (transparent) and 1 (colored)
-                duration: 300,
+                toValue: isLiked ? 1 : 0, // Toggle animation
+                duration: 150,
                 useNativeDriver: false, // Required for color interpolation
             }).start();
+        }, [isLiked]);
+
+        const handleLikeToggle = () => {
+            setIsLiked(!isLiked); // Optimistically toggle like state
+            onToggleLike(item.id); // Trigger Redux action to sync with backend
         };
 
         // Interpolate background color based on animation value
@@ -101,11 +112,11 @@ const Home = ({ navigation }) => {
                 <TouchableOpacity
                     style={styles.heartButtonContainer}
                     activeOpacity={0.6}
-                    onPress={toggleLike}
+                    onPress={handleLikeToggle}
                 >
                     <Animated.View style={[styles.heartButton, { backgroundColor: animatedBackgroundColor }]}>
                         <AntDesign
-                            name={liked ? 'heart' : 'hearto'}
+                            name={isLiked ? 'heart' : 'hearto'}
                             size={hp(2.4)}
                             color={COLORS.tertiaryWhite} // White heart icon
                         />
@@ -115,74 +126,85 @@ const Home = ({ navigation }) => {
         );
     });
 
-    const handleImagePress = (item) => {
-        dispatch(addRecentActivity(item));
-        navigation.navigate('ImageScreen', { imageUrl: item.src.original });
-    };
+    const handleImagePress = useCallback(
+        item => {
+            dispatch(addRecentActivity(item));
+            navigation.navigate('ImageScreen', { imageUrl: item.src.original });
+        },
+        [dispatch, navigation]
+    );
 
     const renderItem = useCallback(
-        ({ item }) => (
-            <View style={styles.imageWrapper}>
-                <MemoizedImageItem item={item} />
-            </View>
-        ),
-        []
+        ({ item }) => {
+            const isLiked = wallpapers.find((wallpaper) => wallpaper.id === item.id)?.liked;
+
+            return (
+                <MemoizedImageItem
+                    item={item}
+                    isLiked={isLiked}
+                    onToggleLike={(id) => dispatch(toggleLike(id))}
+                />
+            );
+        },
+        [dispatch, wallpapers]
     );
 
     return (
         <SafeAreaView style={styles.container}>
-            <StatusBar backgroundColor={COLORS.white} barStyle="dark-content" />
+            <StatusBar backgroundColor={'#4A46E9'} barStyle="light-content" />
 
-            <View style={[styles.header,]}>
-                <TouchableOpacity onPress={() => navigation.navigate("Profile")} activeOpacity={0.6}>
-                    <Image
-                        source={{ uri: userInfo?.user?.photo || userInfo?.photoURL }}
-                        resizeMode='contain'
-                        style={styles.profileImage}
-                    />
-                </TouchableOpacity>
-                <Text style={styles.title}>PixelVista</Text>
-                <TouchableOpacity onPress={toggleInput}>
-                    <MaterialIcons name="search" size={hp(4.3)} color={COLORS.darkgray} />
-                </TouchableOpacity>
-            </View>
-
-            {/* Search Bar */}
-            <Animated.View
-                style={[
-                    {
-                        height: searchAnimation.interpolate({
-                            inputRange: [0, 1],
-                            outputRange: [0, hp(7)], // Wrapper height matches expanded height
-                        }),
-                        overflow: 'hidden', // Manage overflow at the wrapper level
-                    },
-                ]}
-            >
-                <View style={styles.searchBarContainer}>
-                    <View style={styles.searchBox}>
-                        {searchText.length === 0 && (
-                            <Octicons name="search" size={hp(3)} color={COLORS.darkgray} style={styles.searchIcon} />
-                        )}
-                        <TextInput
-                            placeholder="Search your favorite wallpaper..."
-                            placeholderTextColor={COLORS.darkgray}
-                            value={searchText}
-                            onChangeText={setSearchText}
-                            style={styles.searchInput}
-                            onSubmitEditing={handleSearch}
+            <LinearGradient colors={['#4A46E9', '#6E67F1']} style={styles.headerGradient}>
+                <View style={[styles.header,]}>
+                    <TouchableOpacity onPress={() => navigation.navigate("Profile")} activeOpacity={0.6}>
+                        <Image
+                            source={{ uri: userInfo?.user?.photo || userInfo?.photoURL }}
+                            resizeMode='contain'
+                            style={styles.profileImage}
                         />
-                        {searchText.length > 0 && (
-                            <TouchableOpacity onPress={clearSearch}>
-                                <Entypo name="cross" size={hp(3)} color={COLORS.darkgray} />
-                            </TouchableOpacity>
-                        )}
-                    </View>
-                    <TouchableOpacity style={styles.filterButton} activeOpacity={0.7}>
-                        <MaterialCommunityIcons name="tune-variant" size={hp(3.5)} color={COLORS.white} />
+                    </TouchableOpacity>
+                    <Text style={styles.title}>PixelVista</Text>
+                    <TouchableOpacity onPress={toggleInput}>
+                        <MaterialIcons name="search" size={hp(4.3)} color={COLORS.white} />
                     </TouchableOpacity>
                 </View>
-            </Animated.View>
+
+                {/* Search Bar */}
+                <Animated.View
+                    style={[
+                        {
+                            height: searchAnimation.interpolate({
+                                inputRange: [0, 1],
+                                outputRange: [0, hp(7)], // Wrapper height matches expanded height
+                            }),
+                            overflow: 'hidden', // Manage overflow at the wrapper level
+                        },
+                    ]}
+                >
+                    <View style={styles.searchBarContainer}>
+                        <View style={styles.searchBox}>
+                            {searchText.length === 0 && (
+                                <Octicons name="search" size={hp(3)} color={COLORS.darkgray} style={styles.searchIcon} />
+                            )}
+                            <TextInput
+                                placeholder="Search your favorite wallpaper..."
+                                placeholderTextColor={COLORS.darkgray}
+                                value={searchText}
+                                onChangeText={setSearchText}
+                                style={styles.searchInput}
+                                onSubmitEditing={handleSearch}
+                            />
+                            {searchText.length > 0 && (
+                                <TouchableOpacity onPress={clearSearch}>
+                                    <Entypo name="cross" size={hp(3)} color={COLORS.darkgray} />
+                                </TouchableOpacity>
+                            )}
+                        </View>
+                        <TouchableOpacity style={styles.filterButton} activeOpacity={0.7}>
+                            <MaterialCommunityIcons name="tune-variant" size={hp(3.5)} color={COLORS.white} />
+                        </TouchableOpacity>
+                    </View>
+                </Animated.View>
+            </LinearGradient>
 
             <View style={styles.wallpaperListContainer}>
                 <FlatList
@@ -212,6 +234,11 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: COLORS.white,
     },
+    headerGradient: {
+        paddingBottom: hp(1),
+        borderBottomLeftRadius: wp(6),
+        borderBottomRightRadius: wp(6),
+    },
     header: {
         paddingVertical: hp(1),
         flexDirection: 'row',
@@ -219,11 +246,13 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         height: hp(7),
         paddingHorizontal: wp(4),
+
     },
     title: {
         fontSize: hp(3),
         fontWeight: '700',
-        color: COLORS.secondaryBlack,
+        fontFamily: 'Poppins-Bold',
+        color: COLORS.tertiaryWhite,
     },
     profileImage: {
         height: wp(10),
@@ -234,10 +263,15 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         paddingLeft: wp(4),
-        height: hp(7), // Full height of the search bar
+        height: hp(6.5), // Full height of the search bar
         backgroundColor: '#f1f1f1',
         borderRadius: wp(4),
         marginHorizontal: wp(3.5),
+        shadowColor: COLORS.darkgray,
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 7,
     },
     searchBox: {
         flex: 1,
@@ -250,11 +284,11 @@ const styles = StyleSheet.create({
         backgroundColor: '#4A46E9',
         borderRadius: hp(2),
         padding: hp(1.5),
-        shadowColor: "#000",
+        shadowColor: COLORS.tertiaryWhite,
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.1,
         shadowRadius: 4,
-        elevation: 3,
+        elevation: 7,
     },
 
     searchIcon: {
@@ -298,7 +332,7 @@ const styles = StyleSheet.create({
         borderRadius: wp(9.5),
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: 'rgba(255, 255, 255, 0.3)', // Initial transparent background
+        backgroundColor: 'rgba(255, 255, 255, 0.5)', // Initial transparent background
     },
 
 });
