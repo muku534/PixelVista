@@ -8,10 +8,11 @@ import {
 } from '../../../Components/Pixel/Index';
 import { COLORS } from '../../../../constants';
 import Home from '../../home/Home';
-import WishList from '../../home/WishList';
+import WishList from '../../home/Favorites';
 import Editor from '../../home/editor';
 import Search from '../../home/Collections';
 import Collections from '../../home/Collections';
+import Favorites from '../../home/Favorites';
 
 const Tab = createBottomTabNavigator();
 
@@ -65,14 +66,14 @@ const TabStack = () => {
                 }}
             />
             <Tab.Screen
-                name="Wishlist"
-                component={WishList}
+                name="Favorites"
+                component={Favorites}
                 options={{
                     headerShown: false,
                     tabBarIcon: ({ focused }) => (
                         <TabIcon
                             iconName={focused ? 'cards-heart' : 'cards-heart-outline'}
-                            label="Wishlist"
+                            label="Favorites"
                             focused={focused}
                         />
                     ),
