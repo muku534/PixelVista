@@ -2,13 +2,14 @@ import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { FlatList, SafeAreaView, StyleSheet, Text, TouchableOpacity, View, Animated, ActivityIndicator } from 'react-native';
 import FastImage from 'react-native-fast-image';
 import AntDesign from 'react-native-vector-icons/AntDesign';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import { COLORS } from '../../../../constants';
 import { heightPercentageToDP as hp, widthPercentageToDP as wp } from '../../../Components/Pixel/Index';
 import { useDispatch, useSelector } from 'react-redux';
+import LinearGradient from 'react-native-linear-gradient';
 
 const CollectionDetails = ({ route, navigation }) => {
-    const { collectionId } = route.params;
+    const { collectionId, collectionName } = route.params;
 
     const [collections, setCollections] = useState([]);
     const [page, setPage] = useState(1);
@@ -108,9 +109,24 @@ const CollectionDetails = ({ route, navigation }) => {
 
     return (
         <SafeAreaView style={styles.container}>
-            <View style={[styles.header,]}>
-                <Text style={styles.title}>Collection Details</Text>
-            </View>
+            <LinearGradient colors={['#4A46E9', '#6E67F1']} style={styles.headerGradient}>
+                <View style={[styles.header,]}>
+                    <TouchableOpacity
+                        onPress={() => navigation.goBack()}
+                        style={styles.backButton}
+                        activeOpacity={0.7}
+                    >
+                        <FontAwesome5
+                            name="chevron-left"
+                            size={hp(2.6)}
+                            color={COLORS.darkgray1}
+                        />
+                    </TouchableOpacity>
+
+                    <Text style={styles.title}>{collectionName}</Text>
+                    <Text style={{ width: wp(5) }}></Text>
+                </View>
+            </LinearGradient>
 
             <View style={styles.wallpaperListContainer}>
                 <FlatList
@@ -121,11 +137,13 @@ const CollectionDetails = ({ route, navigation }) => {
                     onEndReached={handleEndReached}
                     onEndReachedThreshold={0.5}
                     ListEmptyComponent={
-                        <View style={styles.emptyContainer}>
-                            <Text style={styles.emptyText}>No data available</Text>
-                        </View>
+                        !loading && (
+                            <View style={styles.emptyContainer}>
+                                <Text style={styles.emptyText}>No data available</Text>
+                            </View>
+                        )
                     }
-                    ListFooterComponent={loading && <ActivityIndicator size="large" color={COLORS.primary} />}
+                    ListFooterComponent={loading && <ActivityIndicator size="large" color={'#4A46E9'} />}
                 />
             </View>
         </SafeAreaView>
@@ -134,17 +152,31 @@ const CollectionDetails = ({ route, navigation }) => {
 
 const styles = StyleSheet.create({
     container: { flex: 1, backgroundColor: COLORS.white },
+    headerGradient: {
+        paddingBottom: hp(1),
+        borderBottomLeftRadius: wp(6),
+        borderBottomRightRadius: wp(6),
+    },
     header: {
         flexDirection: 'row',
-        justifyContent: 'center',
+        justifyContent: 'space-between',
         alignItems: 'center',
-        height: hp(4),
+        height: hp(7),
         paddingHorizontal: wp(4),
     },
     title: {
         fontSize: hp(3),
         fontWeight: '700',
-        color: COLORS.secondaryBlack,
+        color: COLORS.tertiaryWhite,
+    },
+    backButton: {
+        width: wp(10),
+        height: hp(5),
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: '#f1f1f1',
+        // padding: hp(1),
+        borderRadius: wp(3),
     },
     wallpaperListContainer: {
         flex: 1,
